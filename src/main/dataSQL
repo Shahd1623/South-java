@@ -1,0 +1,12 @@
+select * from agent;
+select * from category;
+select * from city;
+select * from documents;
+select * from listing;
+select * from offer;
+select * from `Property Features` ;
+select * from `Property Images`;
+select * from `Property Reviews`;
+select * from `Property Types`;
+select * from transaction;
+select * from user;
