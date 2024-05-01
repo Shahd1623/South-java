@@ -1,19 +1,20 @@
 package Servlets;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import core.PropertyFeatures;
-import core.PropertyFeaturesDao;
-import core.PropertyFeaturesDaoImpl;
 import Database.DatabaseConfig;
 import Database.DatabaseConnection;
 import Database.MySqlDatabaseConnection;
+import core.PropertyFeatures;
+import core.PropertyFeaturesDao;
+import core.PropertyFeaturesDaoImpl;
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
 
-@WebServlet("/propertyFeaturesServlet")
+@WebServlet("/PropertyFeatureServlet")
 public class PropertyFeaturesServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private PropertyFeaturesDao propertyFeaturesDao;
@@ -24,8 +25,8 @@ public class PropertyFeaturesServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        // Initialize DAO with a specific database configuration
-        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/your_database", "username", "password");
+        // Initialize the DAO with a specific database configuration
+        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/southdb", "root", "root");
         DatabaseConnection dbConnection = new MySqlDatabaseConnection(config);
         propertyFeaturesDao = new PropertyFeaturesDaoImpl(dbConnection);
     }
@@ -36,14 +37,14 @@ public class PropertyFeaturesServlet extends HttpServlet {
             String action = request.getParameter("action");
 
             if ("list".equals(action)) {
-                List<PropertyFeatures> features = propertyFeaturesDao.getAllPropertyFeatures();
-                request.setAttribute("features", features);
+                List<PropertyFeatures> features = propertyFeaturesDao.getAllFeatures();
+                request.setAttribute("propertyFeaturesList", features);
                 RequestDispatcher dispatcher = request.getRequestDispatcher("propertyFeaturesList.jsp");
                 dispatcher.forward(request, response);
             } else if ("get".equals(action)) {
                 int featureId = Integer.parseInt(request.getParameter("featureId"));
-                PropertyFeatures feature = propertyFeaturesDao.getPropertyFeaturesById(featureId);
-                request.setAttribute("feature", feature);
+                PropertyFeatures feature = propertyFeaturesDao.getFeatureById(featureId);
+                request.setAttribute("propertyFeature", feature);
                 RequestDispatcher dispatcher = request.getRequestDispatcher("propertyFeature.jsp");
                 dispatcher.forward(request, response);
             } else {
@@ -65,35 +66,35 @@ public class PropertyFeaturesServlet extends HttpServlet {
                 String featureValue = request.getParameter("featureValue");
 
                 PropertyFeatures newFeature = new PropertyFeatures(0, listingId, featureName, featureValue);
-                propertyFeaturesDao.addPropertyFeatures(newFeature);
+                propertyFeaturesDao.addFeature(newFeature);
 
-                response.sendRedirect("propertyFeaturesServlet?action=list");
+                response.sendRedirect("propertyFeatureServlet?action=list");
             } else if ("update".equals(action)) {
                 int featureId = Integer.parseInt(request.getParameter("featureId"));
                 int listingId = Integer.parseInt(request.getParameter("listingId"));
                 String featureName = request.getParameter("featureName");
-                String featureValue = request.getparameter("featureValue");
+                String featureValue = request.getParameter("featureValue");
 
                 PropertyFeatures updatedFeature = new PropertyFeatures(featureId, listingId, featureName, featureValue);
-                propertyFeaturesDao.updatePropertyFeatures(updatedFeature);
+                propertyFeaturesDao.updateFeature(updatedFeature);
 
-                response.sendRedirect("propertyFeaturesServlet?action=list");
+                response.sendRedirect("propertyFeatureServlet?action=list");
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
             }
         } catch (SQLException | NumberFormatException e) {
-            throw new ServletException("Error processing request.", e);
+            throw a new ServletException("Error processing request.", e);
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            int featureId = Integer parseInt(request.getParameter("featureId"));
-            propertyFeaturesDao.deletePropertyFeatures(featureId);
-            response.sendRedirect("propertyFeaturesServlet?action=list");
+            int featureId = Integer.parseInt(request.getParameter("featureId"));
+            propertyFeaturesDao.deleteFeature(featureId);
+            response.sendRedirect("propertyFeatureServlet?action=list");
         } catch (SQLException | NumberFormatException e) {
-            throw new ServletException("Error processing request.", e);
+            throw a new ServletException("Error processing request.", e);
         }
     }
 }

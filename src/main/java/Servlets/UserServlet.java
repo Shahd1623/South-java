@@ -1,45 +1,57 @@
 package Servlets;
 
-import core.UserDao;
-import core.UserDaoImpl;
-import core.User;
-import javax.servlet.*;
-import javax.servlet.http.*;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import core.User;
+import core.UserDao;
+import core.UserDaoImpl;
+import Database.DatabaseConfig;
+import Database.DatabaseConnection;
+import Database.MySqlDatabaseConnection;
+
+@WebServlet("/userServlet")
 public class UserServlet extends HttpServlet {
-    private UserDao userDAO;
+    private static final long serialVersionUID = 1L;
+    private UserDao userDao;
+
+    public UserServlet() {
+        super();
+    }
 
     @Override
     public void init() throws ServletException {
-        // Initialize the DAO with a database connection
-        Connection connection = null; // Replace with a valid database connection
-        this.userDAO = new UserDaoImpl(connection);
+        // Initialize the DAO with a specific database configuration
+        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/your_database", "your_user", "your_password");
+        DatabaseConnection dbConnection = new MySqlDatabaseConnection(config);
+        userDao = new UserDaoImpl(dbConnection);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             String action = request.getParameter("action");
-            
+
             if ("list".equals(action)) {
-                // Fetch all users
-                List<User> users = userDAO.getAllUsers();
-                request.setAttribute("users", users);
-                // Forward to a JSP page to display the list of users
-                request.getRequestDispatcher("/users.jsp").forward(request, response);
+                List<User> users = userDao.getAllUsers();
+                request.setAttribute("userList", users);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("userList.jsp");
+                dispatcher.forward(request, response);
             } else if ("get".equals(action)) {
-                // Fetch a specific user by ID
                 int userId = Integer.parseInt(request.getParameter("userId"));
-                User user = userDAO.getUserById(userId);
+                User user = userDao.getUserById(userId);
                 request.setAttribute("user", user);
-                request.getRequestDispatcher("/user.jsp").forward(request, response);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("user.jsp");
+                dispatcher.forward(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
             }
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing request.");
+        } catch (SQLException | NumberFormatException e) {
+            throw new ServletException("Error processing request.", e);
         }
     }
 
@@ -49,20 +61,16 @@ public class UserServlet extends HttpServlet {
             String action = request.getParameter("action");
 
             if ("create".equals(action)) {
-                // Create a new user
                 String username = request.getParameter("username");
                 String email = request.getParameter("email");
                 String password = request.getParameter("password");
                 Date registrationDate = Date.valueOf(request.getParameter("registrationDate"));
 
                 User newUser = new User(0, username, email, password, registrationDate);
+                userDao.addUser(newUser);
 
-                userDAO.addUser(newUser);
-
-                // Redirect or send a success response
-                response.sendRedirect("users?action=list");
+                response.sendRedirect("userServlet?action=list");
             } else if ("update".equals(action)) {
-                // Update an existing user
                 int userId = Integer.parseInt(request.getParameter("userId"));
                 String username = request.getParameter("username");
                 String email = request.getParameter("email");
@@ -70,13 +78,14 @@ public class UserServlet extends HttpServlet {
                 Date registrationDate = Date.valueOf(request.getParameter("registrationDate"));
 
                 User updatedUser = new User(userId, username, email, password, registrationDate);
+                userDao.updateUser(updatedUser);
 
-                userDAO.updateUser(updatedUser);
-
-                response.sendRedirect("users?action=list");
+                response.sendRedirect("userServlet?action=list");
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
             }
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing request.");
+        } catch (SQLException | NumberFormatException e) {
+            throw new ServletException("Error processing request.", e);
         }
     }
 
@@ -84,12 +93,10 @@ public class UserServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             int userId = Integer.parseInt(request.getParameter("userId"));
-
-            userDAO.deleteUser(userId);
-
-            response.sendRedirect("users?action=list");
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing request.");
+            userDao.deleteUser(userId);
+            response.sendRedirect("userServlet?action=list");
+        } catch (SQLException | NumberFormatException e) {
+            throw new ServletException("Error processing request.", e);
         }
     }
 }

@@ -1,17 +1,16 @@
 package Servlets;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import core.Agent;
-import core.AgentDao;
-import core.AgentDaoImpl;
 import Database.DatabaseConfig;
 import Database.DatabaseConnection;
 import Database.MySqlDatabaseConnection;
+import core.Agent;
+import core.AgentDao;
+import core.AgentDaoImpl;
+import jakarta.servlet.*;
 
 @WebServlet("/agentServlet")
 public class AgentServlet extends HttpServlet {

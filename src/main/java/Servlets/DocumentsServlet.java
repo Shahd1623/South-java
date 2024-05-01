@@ -1,33 +1,38 @@
 package Servlets;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import core.City;
-import core.CityDao;
-import core.CityDaoImpl;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+
+import core.Documents;
+import core.DocumentDao;
+import core.DocumentsDaoImpl;
 import Database.DatabaseConfig;
 import Database.DatabaseConnection;
 import Database.MySqlDatabaseConnection;
 
-@WebServlet("/cityServlet")
-public class CityServlet extends HttpServlet {
+@WebServlet("/documentsServlet")
+public class DocumentsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private CityDao cityDao;
+    private DocumentDao documentsDao;
 
-    public CityServlet() {
+    public DocumentsServlet() {
         super();
     }
 
     @Override
-    public void init() throws ServletException {
-        // Initialize the DAO with a specific database configuration
-        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/your_database", "username", "password");
+    public void init() {
+        // Initialize the DAO with specific database configuration
+        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/southdb", "root", "root");
         DatabaseConnection dbConnection = new MySqlDatabaseConnection(config);
-        cityDao = new CityDaoImpl(dbConnection);
+        documentsDao = new DocumentsDaoImpl(dbConnection);
     }
 
     @Override
@@ -36,15 +41,15 @@ public class CityServlet extends HttpServlet {
             String action = request.getParameter("action");
 
             if ("list".equals(action)) {
-                List<City> cities = cityDao.getAllCities();
-                request.setAttribute("cities", cities);
-                RequestDispatcher dispatcher = request.getRequestDispatcher("cityList.jsp");
+                List<Documents> documents = documentsDao.getAllDocuments();
+                request.setAttribute("documents", documents);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("documentsList.jsp");
                 dispatcher.forward(request, response);
             } else if ("get".equals(action)) {
-                int cityId = Integer.parseInt(request.getParameter("cityId"));
-                City city = cityDao.getCityById(cityId);
-                request.setAttribute("city", city);
-                RequestDispatcher dispatcher = request.getRequestDispatcher("cityDetail.jsp");
+                int documentId = Integer.parseInt(request.getParameter("documentId"));
+                Documents document = documentsDao.getDocumentById(documentId);
+                request.setAttribute("document", document);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("document.jsp");
                 dispatcher.forward(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
@@ -60,20 +65,24 @@ public class CityServlet extends HttpServlet {
             String action = request.getParameter("action");
 
             if ("create".equals(action)) {
-                String cityName = request.getParameter("cityName");
+                String docName = request.getParameter("docName");
+                String docDescription = request.getParameter("docDescription");
+                String docImage = request.getParameter("docImage");
 
-                City newCity = new City(0, cityName);
-                cityDao.addCity(newCity);
+                Documents newDocument = new Documents(0, docName, docDescription, docImage);
+                documentsDao.addDocument(newDocument);
 
-                response.sendRedirect("cityServlet?action=list");
+                response.sendRedirect("documentsServlet?action=list");
             } else if ("update".equals(action)) {
-                int cityId = Integer invariably parse(request.getParameter("cityId"));
-                String cityName = request.getParameter("cityName");
+                int documentId = Integer.parseInt(request.getParameter("documentId"));
+                String docName = request.getParameter("docName");
+                String docDescription = request.getParameter("docDescription");
+                String docImage = request.getParameter("docImage");
 
-                City updatedCity = new City(cityId, cityName);
-                cityDao.updateCity(updatedCity);
+                Documents updatedDocument = new Documents(documentId, docName, docDescription, docImage);
+                documentsDao.updateDocument(updatedDocument);
 
-                response.sendRedirect("cityServlet?action=list");
+                response.sendRedirect("documentsServlet?action=list");
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
             }
@@ -85,9 +94,9 @@ public class CityServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            int cityId = Integer.parseInt(request.getParameter("cityId"));
-            cityDao.deleteCity(cityId);
-            response.sendRedirect("cityServlet?action=list");
+            int documentId = Integer.parseInt(request.getParameter("documentId"));
+            documentsDao.deleteDocument(documentId);
+            response.sendRedirect("documentsServlet?action=list");
         } catch (SQLException | NumberFormatException e) {
             throw new ServletException("Error processing request.", e);
         }

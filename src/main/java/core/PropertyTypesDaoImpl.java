@@ -1,88 +1,89 @@
 package core;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
+
+import Database.DatabaseConnection;
 
 public class PropertyTypesDaoImpl implements PropertyTypesDao {
-    private final Connection connection; // Database connection (like JDBC)
+    private final DatabaseConnection dbConnection;
 
-    public PropertyTypesDaoImpl(Connection connection) {
-        this.connection = connection;
+    public PropertyTypesDaoImpl(DatabaseConnection dbConnection) {
+        this.dbConnection = dbConnection;
     }
 
     @Override
-    public List<PropertyTypes> getAllPropertyTypes() throws SQLException {
+    public void addType(PropertyTypes type) throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement("INSERT INTO property_types (type_name) VALUES (?)");
+        pstmt.setString(1, type.getTypeName());
+        pstmt.executeUpdate();
+        pstmt.close();
+        conn.close();
+    }
+
+    @Override
+    public List<PropertyTypes> getAllTypes() throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * FROM property_types");
+
         List<PropertyTypes> types = new ArrayList<>();
-        String sql = "SELECT * FROM property_types;"; // Adjust based on your schema
+        while (rs.next()) {
+            int typeId = rs.getInt("type_id");
+            String typeName = rs.getString("type_name");
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                int typeId = rs.getInt("type_id");
-                String typeName = rs.getString("type_name");
-
-                types.add(new PropertyTypes(typeId, typeName));
-            }
+            types.add(new PropertyTypes(typeId, typeName));
         }
+
+        rs.close();
+        stmt.close();
+        conn.close();
 
         return types;
     }
 
     @Override
-    public PropertyTypes getPropertyTypeById(int typeId) throws SQLException {
-        String sql = "SELECT * FROM property_types WHERE type_id = ?;";
+    public PropertyTypes getTypeById(int typeId) throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM property_types WHERE type_id = ?");
+        pstmt.setInt(1, typeId);
+        ResultSet rs = pstmt.executeQuery();
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, typeId);
+        PropertyTypes type = null;
+        if (rs.next()) {
+            String typeName = rs.getString("type_name");
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String typeName = rs.getString("type_name");
-
-                    return new PropertyTypes(typeId, typeName);
-                } else {
-                    return null; // No matching type found
-                }
-            }
+            type = new PropertyTypes(typeId, typeName);
         }
+
+        rs.close();
+        pstmt.close();
+        conn.close();
+
+        return type;
     }
 
     @Override
-    public void addPropertyType(PropertyTypes propertyType) throws SQLException {
-        String sql = "INSERT INTO property_types (type_name) VALUES (?);";
+    public void updateType(PropertyTypes type) throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement("UPDATE property_types SET type_name = ? WHERE type_id = ?");
+        pstmt.setString(1, type.getTypeName());
+        pstmt.setInt(2, type.getTypeId());
+        pstmt.executeUpdate();
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, propertyType.getTypeName());
-
-            ps.executeUpdate();
-        }
+        pstmt.close();
+        conn.close();
     }
 
     @Override
-    public void updatePropertyType(PropertyTypes propertyType) throws SQLException {
-        String sql = "UPDATE property_types SET type_name = ? WHERE type_id = ?;";
+    public void deleteType(int typeId) throws SQLException {
+        Connection conn = dbConnection.getConnection();
+        PreparedStatement pstmt = conn.prepareStatement("DELETE FROM property_types WHERE type_id = ?");
+        pstmt.setInt(1, typeId);
+        pstmt.executeUpdate();
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, propertyType.getTypeName());
-            ps.setInt(2, propertyType.getTypeId());
-
-            ps.executeUpdate();
-        }
-    }
-
-    @Override
-    public void deletePropertyType(int typeId) throws SQLException {
-        String sql = "DELETE FROM property_types WHERE type_id = ?;";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, typeId);
-
-            ps.executeUpdate();
-        }
+        pstmt.close();
+        conn.close();
     }
 }

@@ -41,7 +41,5 @@
         </tbody>
     </table>
 
-    <!-- Link to create a new agent -->
-    <p><a href="createAgent.jsp">Add New Agent</a></p>
 </body>
 </html>

@@ -1,31 +1,129 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
-         version="4.0">
 
-	<dependency>
-	  <groupId>jakarta.servlet</groupId>
-	  <artifactId>jakarta.servlet-api</artifactId>
-	  <version>5.0.0</version> <!-- Adjust as needed -->
-	  <scope>provided</scope>
-	</dependency>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xmlns="https://jakarta.ee/xml/ns/jakartaee" 
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd" 
+         version="5.0">
 
-    <!-- Example Servlet Definition -->
-    <servlet>
-        <servlet-name>AgentServlet</servlet-name> <!-- Change to your servlet's name -->
-        <servlet-class>Servlets.AgentServlet</servlet-class> <!-- Change to your servlet's class -->
-    </servlet>
+  <!-- Display name for the application -->
+  <display-name>Final_project v1</display-name>
 
-    <!-- Example Servlet Mapping -->
-    <servlet-mapping>
-        <servlet-name>AgentServlet</servlet-name> <!-- Must match the servlet name -->
-        <url-pattern>/agentServlet</url-pattern> <!-- URL pattern for this servlet -->
-    </servlet-mapping>
+  <!-- Welcome file configuration -->
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+  </welcome-file-list>
 
-    <!-- Session Configuration (Optional) -->
-    <session-config>
-        <session-timeout>30</session-timeout> <!-- Session timeout in minutes -->
-    </session-config>
+  <!-- Servlet declarations -->
+  <servlet>
+    <description>Handles user operations</description>
+    <display-name>UserServlet</display-name>
+    <servlet-name>UserServlet</servlet-name>
+    <servlet-class>Servlets.UserServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles transaction operations</description>
+    <display-name>TransactionServlet</display-name>
+    <servlet-name>TransactionServlet</servlet-name>
+    <servlet-class>Servlets.TransactionServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles property types</description>
+    <display-name>PropertyTypesServlet</display-name>
+    <servlet-name>PropertyTypesServlet</servlet-name>
+    <servlet-class>Servlets.PropertyTypesServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles property features</description>
+    <display-name>PropertyFeaturesServlet</display-name>
+    <servlet-name>PropertyFeaturesServlet</servlet-name>
+    <servlet-class>Servlets.PropertyFeaturesServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles property images</description>
+    <display-name>PropertyImageServlet</display-name>
+    <servlet-name>PropertyImageServlet</servlet-name>
+    <servlet-class>Servlets.PropertyImageServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles property reviews</description>
+    <display-name>PropertyReviewsServlet</display-name>
+    <servlet-name>PropertyReviewsServlet</servlet-name>
+    <servlet-class>Servlets.PropertyReviewsServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles property categories</description>
+    <display-name>CategoryServlet</display-name>
+    <servlet-name>CategoryServlet</servlet-name>
+    <servlet-class>Servlets.CategoryServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles agents</description>
+    <display-name>AgentServlet</display-name>
+    <servlet-name>AgentServlet</servlet-name>
+    <servlet-class>Servlets.AgentServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <description>Handles cities</description>
+    <display-name>CityServlet</display-name>
+    <servlet-name>CityServlet</servlet-name>
+    <servlet-class>Servlets.CityServlet</servlet-class>
+  </servlet>
+
+  <!-- Servlet mappings -->
+  <servlet-mapping>
+    <servlet-name>UserServlet</servlet-name>
+    <url-pattern>/UserServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TransactionServlet</servlet-name>
+    <url-pattern>/TransactionServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>PropertyTypesServlet</servlet-name>
+    <url-pattern>/PropertyTypesServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>PropertyFeaturesServlet</servlet-name>
+    <url-pattern>/PropertyFeaturesServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>PropertyImageServlet</servlet-name>
+    <url-pattern>/PropertyImageServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>PropertyReviewsServlet</servlet-name>
+    <url-pattern>/PropertyReviewsServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>CategoryServlet</servlet-name>
+    <url-pattern>/CategoryServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AgentServlet</servlet-name>
+    <url-pattern>/AgentServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>CityServlet</servlet-name>
+    <url-pattern>/CityServlet</url-pattern>
+  </servlet-mapping>
 
 </web-app>

@@ -25,7 +25,7 @@ public class CityServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         // Initialize the DAO with a specific database configuration
-        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/your_database", "username", "password");
+        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/southdb", "root", "root");
         DatabaseConnection dbConnection = new MySqlDatabaseConnection(config);
         cityDao = new CityDaoImpl(dbConnection);
     }

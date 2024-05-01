@@ -1,17 +1,21 @@
 package Servlets;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import core.Category;
-import core.CategoryDao;
-import core.CategoryDaoImpl;
 import Database.DatabaseConfig;
 import Database.DatabaseConnection;
 import Database.MySqlDatabaseConnection;
+import core.Category;
+import core.CategoryDao;
+import core.CategoryDaoImpl;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet("/categoryServlet")
 public class CategoryServlet extends HttpServlet {
@@ -25,7 +29,7 @@ public class CategoryServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         // Initialize the DAO with a specific database configuration
-        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/your_database", "username", "password");
+        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/southdb", "root", "root");
         DatabaseConnection dbConnection = new MySqlDatabaseConnection(config);
         categoryDao = new CategoryDaoImpl(dbConnection);
     }

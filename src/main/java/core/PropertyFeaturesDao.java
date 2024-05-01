@@ -1,6 +1,5 @@
 package core;
 
-import core.PropertyFeatures;
 import java.util.List;
 
 public interface PropertyFeaturesDao {

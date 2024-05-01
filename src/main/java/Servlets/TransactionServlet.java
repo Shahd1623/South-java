@@ -1,70 +1,105 @@
 package Servlets;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.math.BigDecimal;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import core.Transaction;
 import core.TransactionDao;
 import core.TransactionDaoImpl;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletResponse;
-import core.Transaction;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Date;
-import java.math.BigDecimal;
-import java.util.List;
+import Database.DatabaseConfig;
+import Database.DatabaseConnection;
+import Database.MySqlDatabaseConnection;
 
+@WebServlet("/ransactionServlet")
 public class TransactionServlet extends HttpServlet {
-    private TransactionDao transactionDAO;
+    private static final long serialVersionUID = 1L;
+    private TransactionDao transactionDao;
+
+    public TransactionServlet() {
+        super();
+    }
 
     @Override
     public void init() throws ServletException {
-        // Initialize the DAO with a database connection
-        Connection connection = null; // You can replace with a valid connection instance
-        this.transactionDAO = new TransactionDaoImpl(connection);
+        // Initialize the DAO with a specific database configuration
+        DatabaseConfig config = new DatabaseConfig("jdbc:mysql://localhost:3306/sothdb", "root", "root");
+        DatabaseConnection dbConnection = new MySqlDatabaseConnection(config);
+        transactionDao = new TransactionDaoImpl(dbConnection);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             String action = request.getParameter("action");
-            
+
             if ("list".equals(action)) {
-                // Fetch all transactions and send to a JSP or JSON response
-                List<Transaction> transactions = transactionDAO.getAllTransactions();
-                request.setAttribute("transactions", transactions);
-                // Forward to a JSP page to display transactions
-                request.getRequestDispatcher("/transactions.jsp").forward(request, response);
+                List<Transaction> transactions = transactionDao.getAllTransactions();
+                request.setAttribute("transactionList", transactions);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("transactionList.jsp");
+                dispatcher.forward(request, response);
             } else if ("get".equals(action)) {
-                // Fetch a specific transaction by ID
                 int transactionId = Integer.parseInt(request.getParameter("transactionId"));
-                Transaction transaction = transactionDAO.getTransactionById(transactionId);
-                // Forward to a JSP page or return as JSON
+                Transaction transaction = transactionDao.getTransactionById(transactionId);
                 request.setAttribute("transaction", transaction);
-                request.getRequestDispatcher("/transaction.jsp").forward(request, response);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("transaction.jsp");
+                dispatcher.forward(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
             }
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing request.");
+        } catch (SQLException | NumberFormatException e) {
+            throw new ServletException("Error processing request.", e);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // Example: Create a new transaction
-            int listingId = Integer.parseInt(request.getParameter("listingId"));
-            int buyerId = Integer.parseInt(request.getParameter("buyerId"));
-            int sellerId = Integer.parseInt(request.getParameter("sellerId"));
-            Date transactionDate = Date.valueOf(request.getParameter("transactionDate"));
-            BigDecimal transactionAmount = new BigDecimal(request.getParameter("transactionAmount"));
+            String action = request.getParameter("action");
 
-            Transaction newTransaction = new Transaction(0, listingId, buyerId, sellerId, transactionDate, transactionAmount);
+            if ("create".equals(action)) {
+                int listingId = Integer.parseInt(request.getParameter("listingId"));
+                int buyerId = Integer.parseInt(request.getParameter("buyerId"));
+                int sellerId = Integer.parseInt(request.getParameter("sellerId"));
+                Date transactionDate = Date.valueOf(request.getParameter("transactionDate"));
+                BigDecimal transactionAmount = new BigDecimal(request.getParameter("transactionAmount"));
 
-            transactionDAO.addTransaction(newTransaction);
+                Transaction newTransaction = new Transaction(0, listingId, buyerId, sellerId, transactionDate, transactionAmount);
+                transactionDao.addTransaction(newTransaction);
 
-            // Redirect or send a success response
-            response.sendRedirect("transactions?action=list");
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing request.");
+                response.sendRedirect("transactionServlet?action=list");
+            } else if ("update".equals(action)) {
+                int transactionId = Integer.parseInt(request.getParameter("transactionId"));
+                int listingId = Integer.parseInt(request.getParameter("listingId"));
+                int buyerId = Integer.parseInt(request.getParameter("buyerId"));
+                int sellerId = Integer.parseInt(request.getParameter("sellerId"));
+                Date transactionDate = Date.valueOf(request.getParameter("transactionDate"));
+                BigDecimal transactionAmount = new BigDecimal(request.getParameter("transactionAmount"));
+
+                Transaction updatedTransaction = new Transaction(transactionId, listingId, buyerId, sellerId, transactionDate, transactionAmount);
+                transactionDao.updateTransaction(updatedTransaction);
+
+                response.sendRedirect("transactionServlet?action=list");
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
+            }
+        } catch (SQLException | NumberFormatException e) {
+            throw new ServletException("Error processing request.", e);
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int transactionId = Integer.parseInt(request.getParameter("transactionId"));
+            transactionDao.deleteTransaction(transactionId);
+            response.sendRedirect("transactionServlet?action=list");
+        } catch (SQLException | NumberFormatException e) {
+            throw new ServletException("Error processing request.", e);
         }
     }
 }

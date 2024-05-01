@@ -1,6 +1,5 @@
 package core;
 
-import core.PropertyImages;
 import java.util.List;
 
 public interface PropertyImagesDao {
